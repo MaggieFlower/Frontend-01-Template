@@ -1,1 +1,40 @@
 # 每周总结可以写在这里
+1 码点是对字符的编码规则, unicode支持大部分语言, 实现unicede编码规范的是utf8
+2 将码点转换为utf8的规则是:
+  ```
+      0 - 127            0XXXXXXX                                     0 <= m <= 127
+      128 - 2047         110X XXXX 10XX XXXX                          128 <= m <= 2047
+      2048 - 65535       1110 XXXX 10XX XXXX 10XX XXXX                2048 <= m <= 65535
+      65536 - 2097151    1111 0XXX 10XX XXXX 10XX XXXX 10XX XXXX      65536 <= m <= 2097151
+  ```
+3 typedArray是内存视图, 是计算机中一片连续的内存区域, typedArray采用的是小端字节序
+  - typedArray指的是:
+      Int8Array(); 
+      Uint8Array(); 
+      Uint8ClampedArray();
+      Int16Array(); 
+      Uint16Array();
+      Int32Array(); 
+      Uint32Array(); 
+      Float32Array(); 
+      Float64Array();
+  - 使用ArrayBuffer构造函数可以生成一片连续的内存空间, 但是不能进行操作
+  - 使用typedArray构造函数对内存进行操作
+  例子: 
+    ```
+      定义一个拥有8个字节的内存空间
+      var x = new ArrayBuffer(8)  
+      var y = new Int8Array(x)
+      给内存中的数组下标为0 2 7的元素赋值
+      Int8Array(8) [1, 0, 4, 0, 0, 0, 0, 4]
+      拷贝y到m
+      var m = new Int16Array(y)
+      Int16Array(8) [1, 0, 4, 0, 0, 0, 0, 4]
+      创建一个新的类型化视图数组, 如果buffer里面已经有值, 按照小端字序的规则存储
+      *** 分析: 16位的整数由2个字节组成, buffer是8个字节的内存, 所以16位整数需要4个字节来存储
+      *** 0000000100000000 0000010000000000 0000000000000000  0000000000000100
+      var m = new Int16Array(x)
+      Int16Array(4) [1, 4, 0, 1024]
+    ```
+  4 负数以其补码的形式存储在计算机中
+  5 nbsp 是在换行的时候, 不会分割左右两边元素; 平时都只用来搞空格了哈哈哈哈  肤浅
