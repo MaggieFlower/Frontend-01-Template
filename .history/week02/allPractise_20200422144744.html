@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    /*
+      大端: 正常序列(utf8采用大端, typedArray的转换采用小端)
+      小端: 逆序
+      0 - 127            0XXXXXXX                                     0 <= m <= 127
+      128 - 2047         110X XXXX 10XX XXXX                          128 <= m <= 2047
+      2048 - 65535       1110 XXXX 10XX XXXX 10XX XXXX                2048 <= m <= 65535
+      65536 - 2097151    1111 0XXX 10XX XXXX 10XX XXXX 10XX XXXX      65536 <= m <= 2097151
+      匹配数字的正则表达式
+      / [0-9]*([Ee][\+-][1-9]){0,}|[0-9]*[\.][0-9]*([eE][\+-][1-9]*){0,}|0b[01]|0o[0-7]*|0x[0-9]*[a-eA-E]*|\d* /
+      匹配所有的字符串直接量
+      /(^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\u0021-\u002F\u003A-\u0040\u005B-\u0060\u007B-\u007E])[\u0021-\u007E]{6,16}$)|(^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\x21-\x2F\x3A-\x40\x5B-\x60\x7B-\x7E])[\x21-\x7E]{6,16}$)|((?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*)/
+   */
+    function utf8Encoding(string) {
+      if(!Object.prototype.toString.call(string).includes('String')) {
+        throw new Error('the type of charactor is not a String')
+        return 
+      } else {
+        let strCodePoint = string.codePointAt()
+        let strBinary = strCodePoint.toString(2)
+        let length = strBinary.length
+        let res, firstPos, secondPos, thirdPos, fourPos
+        if (strCodePoint>=0 && strCodePoint<=127) {
+          res = strBinary.padStart(8, '0')
+        } else if (strCodePoint>=128 && strCodePoint<=2047) {
+          firstPos = strBinary.slice(-(length),-6)
+          res = `110${firstPos.padStart(5, '0')}10${strBinary.slice(-6)}`
+        } else if (strCodePoint>=2048 && strCodePoint<=65535) {
+          firstPos = strBinary.slice(-6)
+          secondPos = strBinary.slice(-12,-6)
+          thirdPos = strBinary.slice(-(length),-12)
+          res = `1110${thirdPos.padStart(4, '0')}10${secondPos}10${firstPos}`
+        } else if (strCodePoint>=65536 && strCodePoint<=2090151){
+          firstPos = strBinary.slice(-6)
+          secondPos = strBinary.slice(-12,-6)
+          thirdPos = strBinary.slice(-18,-12)
+          fourPos = strBinary.slice(-(length),-18)
+          res = `11110${fourPos.padStart(3, '0')}10${thirdPos}10${secondPos}10${firstPos}`
+        }
+        return res
+      }
+    }
+  </script>
+</body>
+</html>

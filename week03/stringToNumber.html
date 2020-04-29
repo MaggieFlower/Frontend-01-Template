@@ -1,0 +1,113 @@
+<script>
+  let reg = /((\\x|0x)[0-9a-eA-E]{1,2})|((\\o|0o)[0-7]+)|((\\b|0b)[01]+)|(0|[1-9]*\.[0-9]*([Ee][\+-]{0,1}[1-9]+[0]*){0,1})|(0|[0-9]*([Ee][\+-]{0,1}[1-9]+[0]*){0,1})|((\\u|0u)[0-9a-eA-E]{1,4})/
+  let hexArr = ['\\', 'o', 'x', 'u', 'b', 'a', 'b', 'c', 'd', 'e', 'A', 'B', 'C', 'D', 'E']
+  function getNumber(subStr, type, x){
+    let subNumber = 0
+    let subN, subNum
+    if(type === "exponent") {
+      if (subStr.includes('-')){
+        for(let i = 1;i<subStr.length;i++){
+          subN = subStr[i].codePointAt(0) - 48
+          subNumber = subNumber * x + subN
+        }
+      } else {
+        for(let i = 0;i<subStr.length;i++){
+          subN = subStr[i].codePointAt(0) - 48
+          subNumber = subNumber * x + subN
+        }
+      }
+
+    } else if (type === 'fraction') {
+      for (let j = subStr.length-1;j>=0;j--) {
+        subN = subStr[j].codePointAt(0) - 48
+        subNumber = (subNumber / x) + subN
+      }
+    }
+    return subNumber
+  }
+  function convertStringToNumber (string, x=10) {
+    if (!Object.prototype.toString.call(string).includes('String')){
+      throw new Error('not a string')
+    }
+    let res = string
+    let number = 0
+    let n
+    if (!/[^01]/.test(res) && x === 2){
+      // 2进制转10进制
+      for (let i=0;i<res.length;i++){
+        n = res[i].codePointAt(0) - 48
+        number = number * x + n
+      }
+    } else if (!/[^0-7]/.test(res) && x === 8){
+      // 8进制转10进制
+      for (let i=0;i<res.length;i++){
+        n = res[i].codePointAt(0) - 48
+        number = number * x + n
+      }
+    } else if (!/[^0-9a-eA-E]/.test(res) && x === 16) {
+      // 16进制转10进制
+      for (let i=0;i<res.length;i++){
+        if (/[0-9]/.test(res[i])) {
+          n = res[i].codePointAt(0) - 48
+          number = number * x + n
+        } else if (/[a-e]/.test(res[i])){
+          n = res[i].codePointAt(0) - 87
+          number = number * x + n
+        } else {
+          n = res[i].codePointAt(0) - 55
+          number = number * x + n
+        }
+      }
+    } else if(!/[^0-9eE\.\+\-]/.test(res) && x === 10) {
+      // 如果有正的指数, 去掉正号
+      if (res.includes('+')){
+        res = res.replace(/\+/g,'')
+      }
+      // 数字, 是否有指数, 是否有小数, 是否两者都有
+      for (let i=0;i<res.length;i++){
+        if (res[i] === 'e' || res[i] === 'E'){
+          if (res.includes('e-')){
+            let subStr = res.slice(i+2)
+            if (subStr === '') {
+              throw new Error('wrong number or hex')
+            }
+            let subNumber = getNumber(subStr, 'exponent', 10)
+            number = number * x ** (-subNumber)
+          } else {
+            let subStr = res.slice(i+1)
+            if (subStr === '') {
+              throw new Error('wrong number or hex')
+            }
+            let subNumber = getNumber(subStr, 'exponent', 10)
+            number = number * x ** subNumber
+          }
+          break
+        } else if (res[i] === '.'&& !res.includes('e') && !res.includes('E')) {
+          let subStr = res.slice(i+1)
+          let subNumber = getNumber(subStr, 'fraction', 10)
+          number = +(number + subNumber/x).toFixed(subStr.length)
+          break
+        }else if (res[i] === '.' && (res.includes('e') || res.includes('E'))){
+          let subStr = res.slice(i+1, res.indexOf('e'))
+          let subNumber = getNumber(subStr, 'fraction', 10)
+          number = +(number + subNumber/x).toFixed(subStr.length)
+          let subStr1 = res.slice(res.indexOf('e')+1)
+          let subNumber1 = getNumber(subStr1, 'exponent', 10)
+          if (res.includes('e-')){
+            number = +(number * x ** (-subNumber1)).toFixed(8)
+          } else {
+            number = number * x ** subNumber1
+          }
+          break
+        } else {
+          n = res[i].codePointAt(0) - 48
+          number = number * x + n
+        }
+      }
+    } else {
+      throw new Error('wrong number or hex')
+    }
+    return number
+  }
+  console.log(convertStringToNumber('ab', 16))
+</script>

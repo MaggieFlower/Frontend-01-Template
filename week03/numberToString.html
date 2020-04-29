@@ -1,0 +1,45 @@
+<script>
+  function getPiece (num) {
+    let i = 0
+    while(num >= 1){
+      num = num/10
+      i++
+    }
+    return i
+  }
+  function getFraction(number){
+    console.log('number: ', number)
+    let i = 0
+    while(true){
+      number = number * 10
+      i++
+      if(parseInt(number) === number) {
+        break
+      }
+      console.log('i=', i)
+    }
+    return i
+  }
+  function getRes(i, number){
+    let numberArr = []
+      for (let n=0;n<i;n++){
+        if (n===0){
+          numberArr.unshift(Math.floor(number%10))
+        } else {
+          numberArr.unshift(Math.floor(number/10**n%10))
+        }
+      }
+      numberArr = numberArr.join('')
+      return numberArr
+  }
+  function convertNumberToString(number){
+    // 浮点数转字符串不知道怎么搞
+    if (Math.floor(number) !== number) {
+      Number.prototype.toLocaleString.call(number)
+    } else {
+      let i = getPiece(number)
+      return getRes(i, number)
+    }
+  }
+  console.log(convertNumberToString(0x234e34))
+</script>
