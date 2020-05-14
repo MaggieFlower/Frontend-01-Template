@@ -129,10 +129,12 @@ class ResponseParser {
     }
   }
   receiveChar (char) {
+    // 先读响应行
     if (this.current === this.WAITTING_STATUS_LINE) {
       if (char === '\r') {
         this.current = this.WAITTING_STATUS_LINE_END
       } else if (char === '\n') {
+        // 读响应头状态WAITTING_HEADER_NAME
         this.current = this.WAITTING_HEADER_NAME
       }else {
         this.statusline += char
@@ -142,13 +144,16 @@ class ResponseParser {
       if (char === '\n') {
         this.current = this.WAITTING_HEADER_NAME
       }
+      // 读响应头
     } else if (this.current === this.WAITTING_HEADER_NAME) {
       if (char === ':') {
         this.current = this.WAITTING_HEADER_SPACE
       } else if(char === '\r') {
         this.current = this.WAITTING_HEADER_BLOCK_END
+        // 在这里读到响应头部分是否是chunked
         if (this.headers['Transfer-Encoding'] === 'chunked') {
-          this.bodyParser = new TrunkedBodyParser()
+          // 把body的长度传进去
+          this.bodyParser = new TrunkedBodyParser(this.headers['Content-Length'])
         }
       } else {
         this.headerName += char
@@ -176,48 +181,51 @@ class ResponseParser {
       if (char === '\n') {
         this.current = this.WAITTING_BODY
       }
-    }else  if (this.current === this.WAITTING_BODY) { 
+    }else  if (this.current === this.WAITTING_BODY) {
       this.bodyParser.receiveChar(char)
     }
   }
 }
 
 class TrunkedBodyParser {
-  constructor () {
+  constructor (length) {
     this.WAITTING_LENGTH = 0
     this.WAITTING_LENGTH_LINE_END = 1
     this.READING_CHUNKED = 2
     this.WAITTING_NEW_LINE = 3
     this.WAITTING_NEW_LINE_END = 4
     this.isFinished = false
-    this.length = 0
+    this.length = length
     this.content = []
     this.current = this.WAITTING_LENGTH
   }
   receiveChar (char) {
+    console.log('char: ', char)
     if (this.current === this.WAITTING_LENGTH) {
       if (char === '\r') {
-        console.log('this.WAITTING_LENGTH\r')
         if (this.length === 0){
           this.isFinished = true
         }
         this.current = this.WAITTING_LENGTH_LINE_END
-      } else{
-        console.log('this.WAITTING_LENGTH: length计算')
-        this.length *= 10
-        this.length += char.charCodeAt(0) - '0'.charCodeAt(0)
       }
+      // 这个算出来的长度不是实际的字符长度
+      //  else{
+      //   this.length *= 10
+      //   this.length += char.charCodeAt(0) - '0'.charCodeAt(0)
+      //   // console.log('this.length: ', this.length)
+      // }
     } else if (this.current === this.WAITTING_LENGTH_LINE_END) {
-      console.log('this.WAITTING_LENGTH_LINE_END')
       if (char === '\n') {
         this.current = this.READING_CHUNKED
       }
+      // 读body的正文部分
     }else if (this.current === this.READING_CHUNKED) {
-      console.log('this.READING_CHUNKED')
       // 判断 length不等于0 的时候 ， 才push， 否则不push， 去除结尾的\r\n
         this.content.push(char)
         this.length --
+        // console.log('this.length: ', this.length)
       if (this.length === 0) {
+        console.log('changdujieshu ')
         this.current = this.WAITTING_NEW_LINE
       } 
     } else  if (this.current === this.WAITTING_NEW_LINE) {
