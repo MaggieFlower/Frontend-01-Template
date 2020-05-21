@@ -40,7 +40,6 @@ class FindStr {
         this.j ++
         return this.findIndex1
       }
-      if (strIndex >= this.strLen - this.len) return false
       return this.start
   }
   publicFn(strIndex, strValue){
@@ -49,7 +48,9 @@ class FindStr {
       if (this.j === this.len) return this.end
       if (this.j < this.len) return this.publicFn
     } else {
-      if (strIndex >= this.strLen - this.len) return false
+      if (strIndex >= this.strLen - this.len) {
+        return false
+      }
       this.j = this.next[this.j];
       return this.start(strIndex, strValue)
     }
@@ -62,5 +63,5 @@ class FindStr {
 
 let f = new FindStr('231', '12334534203134')
 console.log( f.data() ) // false
-f = new FindStr('acfac', 'abcdefacabcdacfacfe')
+f = new FindStr('facefafa', 'abcdefacebcdacfacefafa')
 console.log( f.data() ) // true
