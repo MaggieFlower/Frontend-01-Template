@@ -104,9 +104,15 @@ module.exports = {
     rule.push(...ast.stylesheet.rules)
   },
   computeCSS: function (element) {
-    elements.push(element.parent)
-    // reverse, 让css的规则从当前元素开始匹配规则
-    elements = [...new Set(elements.slice())].reverse()
+    // 让css的规则从当前元素开始匹配规则
+    let elements = []
+    let el = element
+    while(true) {
+      if (el.parent === undefined || el.parent === null) break
+        elements.push(el.parent)
+        el = el.parent
+    }
+    elements = elements.slice()
     if(!element.computedStyle) {
       element.computedStyle = {}
     }
