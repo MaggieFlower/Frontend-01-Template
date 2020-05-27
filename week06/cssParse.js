@@ -120,7 +120,7 @@ module.exports = {
       for (let r of rule) {
         var selectorParts = r.selectors[0].split(' ').reverse()
         if (!match(element, selectorParts[0])) continue
-        var j = 0
+        var j = 1
         for (var i=0;i<elements.length; i++) {
           if (match(elements[i]), selectorParts[j]) j++
         }
