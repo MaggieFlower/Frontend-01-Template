@@ -1,4 +1,5 @@
 let parseCss = require('css')
+let matched = false
 // 将css暂存到数组中
 let rule = []
 // 收集父元素
@@ -122,7 +123,7 @@ module.exports = {
         if (!match(element, selectorParts[0])) continue
         var j = 1
         for (var i=0;i<elements.length; i++) {
-          if (match(elements[i]), selectorParts[j]) j++
+          if (match(elements[i], selectorParts[j])) j++
         }
         if (j >= selectorParts.length - 1) matched = true
         if (matched) {

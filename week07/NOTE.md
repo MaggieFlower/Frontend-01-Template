@@ -61,7 +61,7 @@
     然后是对dom布局树进行分层(拥有层叠上下文的元素)->绘制->合成
     ---> 对应我们的render部分, 当然render仅仅是进行了合成图片的过程
 
-    影响节点产生层叠上下文的因素:
+    影响节点产生层叠上下文的元素:
     ```
       Root element of the document (<html>).
       Element with a position value **absolute** or **relative** and **z-index value other than auto**.
