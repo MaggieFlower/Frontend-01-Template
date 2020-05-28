@@ -1,4 +1,5 @@
 let parseCss = require('css')
+let matched = false
 // 将css暂存到数组中
 let rule = []
 // 收集父元素
