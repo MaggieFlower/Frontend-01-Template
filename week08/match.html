@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<style>
+  div[name=rf] {
+    width: 100px;
+    height: 100px;
+    background-color: pink
+  }
+  div[name~=rf]~div.rf3{
+    width: 200px;
+    height: 200px;
+    background-color: orange
+  }
+</style>
+<body>
+  <div class="wrapper">
+      <div class="div" id="div">
+        <span></span>
+          <div name="rf-this rf" class="rf rfdiv" id="rf"></div> 
+          <div name="rf-this1" class="rf1 rfdiv1" id="rf1"></div>
+          <div name="rf-this2" class="rf2 rfdiv2" id="rf2"></div>
+          <div name="rf-this3" class="rf3 rfdiv3" id="rf3"></div>
+      </div>
+      <div class="div2" id="button" data-name="cls cls2"></div>
+  </div>
+<script type="module">
+  /*
+    id, class, type
+    idid idclass classclass typeclass typeid
+    id[attr=value] class[attr=value] type[attr=value]
+    combinator + ~ > ' '
+
+    先只考虑一层的 
+    div span
+    div.class div
+    div+span
+    div~class
+  */
+function clsEq(source, selectorSource) {
+  source = source.split(' ')
+  let i = 0
+  for (let part of selectorSource) {
+    if (source.indexOf(part) != -1) {
+      i++
+      if (i == selectorSource.length) break
+    }
+  }
+  if (i == selectorSource.length) return true
+  else return false
+}
+function elementMatch(el, loop, element, attrJson) {
+  let j = 0
+  let siblingMatch = true
+  if (element) {
+    if (!el[element])  return false
+    for (let elType of attrJson) {
+      if (elType.id ==='type' && el[element].tagName.toLowerCase() === elType.value) {
+        j++
+        if (j === attrJson.length) return true
+      } else if (elType.id ==='type' && el[element].tagName.toLowerCase() != elType.value) return false
+    }
+  }
+  if (loop) {
+    while(el[element]) {
+      let siblingJson = getAttrs(el[element])
+      for (let attr of attrJson) {
+        for (let s of siblingJson) {
+          if (s.name == attr.id && attr.id === 'class' && clsEq(s.value, attr.value)) {
+            j++
+          }
+          if (attr.id === 'attr' && s.name == attr.key && clsEq(s.value, attr.value.split(' '))) {
+            j++
+          }
+          if (s.name == attr.id && s.value === attr.value) {
+            j++
+          }
+          if (j === attrJson.length) break
+        }
+      }
+      el = el[element]
+    }
+  } else {
+    if (element) {
+      if (!el[element]) return false
+      let siblingJson = getAttrs(el[element])
+      for (let attr of attrJson) {
+        for (let s of siblingJson) {
+          if (s.name == attr.id && attr.id === 'class' && clsEq(s.value, attr.value)) {
+            j++
+          }
+          if (attr.id === 'attr' && s.name == attr.key && clsEq(s.value, attr.value.split(' '))) {
+            j++
+          }
+           if (s.name == attr.id && s.value === attr.value) {
+            j++
+          }
+          if (j === attrJson.length) break
+        }
+      }
+    } else {
+      let siblingJson = getAttrs(el)
+      for (let elType of attrJson) {
+        if (elType.id ==='type' && el.tagName.toLowerCase() === elType.value) {
+          j++
+          if (j === attrJson.length) return true
+        }
+        else if (elType.id ==='type' && el.tagName.toLowerCase() != elType.value) return false
+      }
+      for (let attr of attrJson) {
+        for (let s of siblingJson) {
+          if (attr.id === 'class' && s.name == attr.id &&  clsEq(s.value, attr.value)) {
+            j++
+          } 
+          if (attr.id === 'attr' && s.name == attr.key && clsEq(s.value, attr.value.split(' '))) {
+            j++
+          }
+          if (s.name == attr.id && s.value == attr.value) {
+            j++
+          }
+          if (j === attrJson.length) break
+        }
+      }
+    }
+  }
+  if (j != attrJson.length) {
+    siblingMatch = false
+  }
+  return siblingMatch
+}
+function getAttrs(element) {
+  return [...element.attributes]
+}
+function isComplex(selectors, s){
+  if (s === '~') {
+    let index = selectors.match(/~[^=]/) && selectors.match(/~[^=]/).index
+    if (selectors.indexOf('~') != -1 && selectors[selectors.indexOf('~')] != '=' ) return index
+  }
+  if (s === '+') {
+    let index = selectors.match(/\+/) && selectors.match(/\+/).index
+    if (selectors.indexOf('+') != -1) return index
+  }
+  if (s === '>') {
+    let index = selectors.match(/>/) && selectors.match(/>/).index
+    if (selectors.indexOf('>') != -1) return index
+  }
+}
+function devideSelectors(selector) {
+  let attrArr = []
+  if (selector.match(/#[a-z]*/)) {
+    attrArr.push({
+      id: 'id',
+      value: selector.match(/#[a-z]*/)[0].replace('#', '')
+    })
+  }
+  if (selector.match(/\.[a-z0-9]*/g)) {
+    attrArr.push({
+      id: 'class',
+      value: selector.match(/\.[a-z0-9]*/g).join(' ').replace(/\./g, '').split(' ')
+    })
+  }
+  if (selector.match(/[a-z]*/)[0] != '') {
+    attrArr.push({
+      id: 'type',
+      value: selector.match(/[a-z]*/)[0]
+    })
+  }
+  if (selector.match(/[a-zA-Z0-9]*-{0,1}[a-zA-Z0-9]*[~|]{0,1}=[a-zA-Z0-9]*-{0,1}[a-zA-Z0-9]*/g)) {
+    let attrSl = selector.match(/[a-zA-Z0-9]*-{0,1}[a-zA-Z0-9]*[~|]{0,1}=[a-zA-Z0-9]*-{0,1}[a-zA-Z0-9]*/g)
+    for (let attr of attrSl) {
+      attrArr.push({
+        id: 'attr',
+        key: attr.match(/[a-zA-Z0-9]*-{0,1}[a-zA-Z0-9]*/)[0],
+        value: attr.match(/[a-zA-Z0-9]*-{0,1}[a-zA-Z0-9]*$/)[0]
+      })
+    }
+  }
+  return attrArr
+}
+function match(selectors, el) {
+  if (!el) return false
+  let tilde = isComplex(selectors, '~'),
+  plus = isComplex(selectors, '+'),
+  lessSign = isComplex(selectors, '>'),
+  signArr = [],
+  selectorsArrs = [],
+  elMatch = true,
+  num = 0,
+  sign;
+  if (tilde != null) signArr.push({sign: '~', index: tilde})
+  if (plus != null) signArr.push({sign: '+', index: plus})
+  if (lessSign != null) signArr.push({sign: '>', index: lessSign})
+  if (signArr.length!=0) {
+    sign = signArr.length!=0 && signArr[0].sign
+    selectorsArrs = selectors.split(sign).reverse()
+  } else {
+    selectorsArrs = selectors.split(' ').reverse()
+  }
+  // 与当前元素匹配
+  let elJson = devideSelectors(selectorsArrs[0].trim())
+  if (elementMatch(el, false, '', elJson)) {
+    let attrJson = devideSelectors(selectorsArrs[1].trim())
+    if (sign === '~') {
+      return elementMatch(el, true, 'previousElementSibling', attrJson)
+    } else if (sign === '+') {
+      return elementMatch(el, false, 'previousElementSibling', attrJson)
+    } else if (sign === '>' || signArr.length === 0) {
+      return elementMatch(el, true, 'parentElement', attrJson)
+    }
+  }
+  return false
+}
+console.log( match('div #button[data-name=cls]', document.querySelector('.div2#button')) ) // true
+console.log( match('div.wrapper #button[data-name=cls]', document.querySelector('.rf')) ) // false
+console.log( match('div.wrapper #button[data-name=cls].div2', document.querySelector('div#button')) ) // true
+console.log( match('div+span', document.querySelector('span')) ) // false
+console.log( match('div span', document.querySelector('span')) ) // true
+console.log( match('div ~ span', document.querySelector('span')) ) // false
+console.log( match('div.rfdiv[name=rf] ~ .rfdiv3[name=rf-this3]', document.querySelector('#rf3')) ) // true
+  </script>
+</body>
+</html>
