@@ -1,0 +1,183 @@
+<style>
+  .cell {
+    width: 100px;
+    height: 100px;
+    display: inline-block;
+    margin: 5px;
+    cursor: pointer;
+    background-color: green;
+
+    vertical-align: middle;
+    text-align: center;
+    line-height: 100px;
+    font-size: 50px;
+
+  }
+</style>
+<div id='tic'></div>
+<script>
+  // 1 ⭕️, 2 ❌
+  let pattern = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0]
+  ]
+  let color = 1
+  let tic = document.querySelector('#tic')
+
+  function handler(x, y) {
+    move(x, y)
+  }
+
+  function removeHandler() {
+    let child = tic.children
+    for (let i = 0; i < child.length; i++) {
+      child[i].removeEventListener('click', handler)
+    }
+  }
+
+  function show() {
+    tic.innerHTML = ''
+    for (let x = 0; x < 3; x++) {
+      for (let y = 0; y < 3; y++) {
+        let cell = document.createElement('div')
+        cell.setAttribute('class', 'cell')
+        cell.innerHTML = pattern[x][y] === 1 ? '⭕️' :
+          pattern[x][y] === 2 ? '❌' : ''
+        cell.addEventListener('click', () => {
+          move(x, y)
+        })
+        tic.appendChild(cell)
+      }
+      tic.appendChild(document.createElement('br'))
+    }
+  }
+
+  function clear() {
+    pattern = [
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0]
+    ]
+    show()
+  }
+
+  function clone(json) {
+    return JSON.parse(JSON.stringify(json))
+  }
+
+  function move(x, y) {
+    if (pattern[x][y] != 0) return
+    pattern[x][y] = color
+    show()
+    if (check(pattern, color, x, y)) {
+      alert(color == 1 ? '⭕️ is win!' : '❌ is win!')
+    }
+    color = 3 - color
+    computerMove()
+  }
+
+  function computerMove() {
+    let point = bestChoice(pattern, color)
+    if (point.point == null) {
+      alert('平局!')
+      return
+    }
+    if (pattern[point.point[0]][point.point[1]] != 0) return
+    pattern[point.point[0]][point.point[1]] = color
+    show()
+    if (check(pattern, color, point.point[0], point.point[1])) {
+      alert(color == 1 ? '⭕️ is win!' : '❌ is win!')
+    }
+    color = 3 - color
+  }
+
+  function check(pattern, color, m, n) {
+    // 优化比对方向
+    if (m + n == 2) {
+      let win = true
+      for (let y = 0; y < 3; y++) {
+        if (pattern[y][2 - y] != color) {
+          win = false
+          break
+        }
+      }
+      if (win) return true
+    }
+    if (m === n) {
+      let win = true
+      for (let y = 0; y < 3; y++) {
+        if (pattern[y][y] != color) {
+          win = false
+          break
+        }
+      }
+      if (win) return true
+    } {
+      let win = true
+      for (let y = 0; y < 3; y++) {
+        if (pattern[m][y] != color) {
+          win = false
+          break
+        }
+      }
+      if (win) return true
+    } {
+      let win = true
+      for (let x = 0; x < 3; x++) {
+        if (pattern[x][n] != color) {
+          win = false
+          break
+        }
+      }
+      if (win) return true
+    }
+    return false
+  }
+
+  function willWin(pattern, color) {
+    for (let x = 0; x < 3; x++) {
+      for (let y = 0; y < 3; y++) {
+        let temp = clone(pattern)
+        if (temp[x][y] != 0) continue
+        temp[x][y] = color
+        if (check(temp, color, x, y)) {
+          return [x, y]
+        }
+      }
+    }
+    return null
+  }
+
+  function bestChoice(pattern, color) {
+    // -1 输, 0 平, 1赢
+    // 判断有么有willWin的点
+    let point = willWin(pattern, color)
+    if (point) {
+      return {
+        point,
+        result: 1
+      }
+    }
+    let result = -1
+    for (let x = 0; x < 3; x++) {
+      for (let y = 0; y < 3; y++) {
+        let temp = clone(pattern)
+        if (temp[x][y] != 0) continue
+
+        temp[x][y] = color
+        let opp = bestChoice(temp, 3 - color)
+        if (-opp.result >= result) {
+          point = [x, y]
+          result = -opp.result
+        }
+      }
+    }
+    return {
+      point,
+      result: point ? result : 0
+    }
+
+  }
+  show(color)
+</script>
