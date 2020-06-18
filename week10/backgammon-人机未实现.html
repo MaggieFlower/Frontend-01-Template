@@ -107,25 +107,6 @@
     11: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     12: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
   }
-
-  左边点之间的关系
-    (y, x)
-    (6,6); (5, 5); (4,4); (3,3); (2,2) 左上
-    (6,6); (7,5); (8,4); (9,3); (10,2) 左下
-    (6,6); (5,7); (4,8); (3, 9); (2, 10)
-    (6, 6); (7, 7); (8,8);(9,9);(10, 10)
-    (6,6); (5,6);(4, 6); (3,6); (2,6)
-    (6,6); (7,6); (8,6); (9, 6);(10,6)
-    (6,6); (6,5);(6,4);(6,3);(6,2)
-    (6,6); (6,7);(6,8);(6,9);(6,10)
-    左边到达5个: 4<=x
-    右边到达5个: x<=8
-    上边到达5个: 4<=y
-    下边到达5个: y<=8
-    右下边到达5个: x<=8;y<=8
-    右上边到达5个: x<=8;4<=y
-    左上边到达5个: 4<=x; 4<=y
-    左下边到达5个: 4<=x; y<=8
     左上: (5,4), (4,3), (3,2), (2,1),(1,0)
       (x, y), (x-1, y-1), (x-2, y-2),(x-3, y-3),(x-4, y-4)
 
@@ -555,13 +536,13 @@
         }
         if (3 - color == 1) {
           let length = blackList.length
-          if (length >= 4 && willWin(gammonRecord, 3 - color, blackList[length - 1][0], blackList[length - 1][1])) {
+          if (length >= 1 && willWin(gammonRecord, 3 - color, blackList[length - 1][0], blackList[length - 1][1])) {
             console.log('上一个黑子的坐标: ', blackList[length - 1][0], blackList[length - 1][1])
             console.log(`黑棋就要胜啦~`)
           }
         } else {
           let length = whiteList.length
-          if (length >= 4 && willWin(gammonRecord, 3 - color, whiteList[length - 1][0], whiteList[length - 1][1])) {
+          if (length >= 1 && willWin(gammonRecord, 3 - color, whiteList[length - 1][0], whiteList[length - 1][1])) {
             console.log('上一个白子的坐标: ', whiteList[length - 1][0], whiteList[length - 1][1])
             console.log(`白棋就要胜啦~`)
           }
@@ -586,7 +567,7 @@
         }
         if (3 - color == 1) {
           let length = blackList.length
-          if (length >= 4 && willWin(gammonRecord, 3 - color, blackList[length - 1][0], blackList[length - 1][1])) {
+          if (length >= 1 && willWin(gammonRecord, 3 - color, blackList[length - 1][0], blackList[length - 1][1])) {
             console.log('上一个黑子的坐标: ', blackList[length - 1][0], blackList[length - 1][1])
             console.log(`黑棋就要胜啦~'`)
           }
@@ -594,7 +575,7 @@
 
           let length = whiteList.length
 
-          if (length >= 4 && willWin(gammonRecord, 3 - color, whiteList[length - 1][0], whiteList[length - 1][1])) {
+          if (length >= 1 && willWin(gammonRecord, 3 - color, whiteList[length - 1][0], whiteList[length - 1][1])) {
             console.log('上一个白子的坐标: ', whiteList[length - 1][0], whiteList[length - 1][1])
             console.log(`白棋就要胜啦~`)
           }
@@ -622,15 +603,13 @@
 
           let length = blackList.length
 
-          if (length >= 4 && willWin(gammonRecord, 3 - color, blackList[length - 1][0], blackList[length - 1][1])) {
+          if (length >= 1 && willWin(gammonRecord, 3 - color, blackList[length - 1][0], blackList[length - 1][1])) {
             console.log('上一个黑子的坐标: ', blackList[length - 1][0], blackList[length - 1][1])
             console.log(`${3-color==1?'黑棋就要胜啦~':'白棋就要胜啦~'}`)
           }
         } else {
-
           let length = whiteList.length
-
-          if (length >= 4 && willWin(gammonRecord, 3 - color, whiteList[length - 1][0], whiteList[length - 1][1])) {
+          if (length >= 1 && willWin(gammonRecord, 3 - color, whiteList[length - 1][0], whiteList[length - 1][1])) {
             console.log('上一个白子的坐标: ', whiteList[length - 1][0], whiteList[length - 1][1])
             console.log(`${3-color==1?'黑棋就要胜啦~':'白棋就要胜啦~'}`)
           }
@@ -655,13 +634,13 @@
         }
         if (3 - color == 1) {
           let length = blackList.length
-          if (length >= 4 && willWin(gammonRecord, 3 - color, blackList[length - 1][0], blackList[length - 1][1])) {
+          if (length >= 1 && willWin(gammonRecord, 3 - color, blackList[length - 1][0], blackList[length - 1][1])) {
             console.log('上一个黑子的坐标: ', blackList[length - 1][0], blackList[length - 1][1])
             console.log(`${3-color==1?'黑棋就要胜啦~':'白棋就要胜啦~'}`)
           }
         } else {
           let length = whiteList.length
-          if (length >= 4 && willWin(gammonRecord, 3 - color, whiteList[length - 1][0], whiteList[length - 1][1])) {
+          if (length >= 1 && willWin(gammonRecord, 3 - color, whiteList[length - 1][0], whiteList[length - 1][1])) {
             console.log('上一个白子的坐标: ', whiteList[length - 1][0], whiteList[length - 1][1])
             console.log(`${3-color==1?'黑棋就要胜啦~':'白棋就要胜啦~'}`)
           }
@@ -670,6 +649,10 @@
       }
     }
   })
+
+  function computerMove(pattern, color, x, y) {
+
+  }
 </script>
 
 </html>
