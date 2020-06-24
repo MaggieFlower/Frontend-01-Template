@@ -1,0 +1,169 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    .cell {
+      width: 6px;
+      height: 6px;
+      background-color: gray;
+      display: inline-block;
+      border-bottom: 1px solid grey;
+      border-top: 1px solid grey;
+      vertical-align: middle;
+      margin: 0.5px;
+    }
+
+    #container {
+      width: 700px;
+      /* line-height: 5px */
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+  <button onclick="localStorage.setItem('map', JSON.stringify(map))"> save</button>
+  <button onclick="delete localStorage.map"> clear</button>
+</body>
+<script>
+  class Sorted {
+    constructor(data, compare) {
+      this.data = data
+      this.compare = compare
+    }
+    take() {
+      if (!this.data.length) return
+      let min = this.data[0]
+      let minIndex = 0
+      for (let i = 1; i < this.data.length; i++) {
+        if (this.compare(this.data[i], min) < 0) {
+          min = this.data[i]
+          minIndex = i
+        }
+      }
+      this.data[minIndex] = this.data[this.data.length - 1]
+      this.data.pop()
+      return min
+    }
+    insert(v) {
+      this.data.push(v)
+    }
+    get length() {
+      return this.data.length
+    }
+  }
+  var map = localStorage.getItem('map') ? JSON.parse(localStorage.getItem('map')) : new Array(10000).fill(0)
+  let mouse = false
+  let clear = false
+  let dom = document.querySelector('#container')
+  for (let x = 0; x < 100; x++) {
+    for (let y = 0; y < 100; y++) {
+      let cell = document.createElement('div')
+      cell.setAttribute('class', 'cell')
+      if (map[x * 100 + y] == 1) {
+        cell.style = "background-color: black"
+      }
+      cell.addEventListener('mouseenter', (event) => {
+        if (mouse) {
+          if (clear) {
+            cell.style = "background-color: gray"
+            map[x * 100 + y] = 0
+          } else {
+            cell.style = "background-color: black"
+            map[x * 100 + y] = 1
+          }
+        }
+      })
+      dom.appendChild(cell)
+    }
+  }
+  document.addEventListener('mousedown', (event) => {
+    // 触发了drag事件, 导致mouseup失效
+    event.preventDefault()
+    mouse = true
+    clear = (event.which == 3)
+  })
+  document.addEventListener('mouseup', (event) => {
+    mouse = false
+  })
+  document.addEventListener('contextmenu', (event) => {
+    event.preventDefault()
+  })
+
+  function sleep(t) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, t)
+    })
+  }
+
+  async function findPath(map, start, end) {
+    dom.children[end[0] + end[1] * 100].style.backgroundColor = "red"
+
+    function distance([x, y]) {
+      return (x - end[0]) ** 2 + (y - end[1]) ** 2
+    }
+    let openList = new Sorted([start], (a, b) => distance(a) - distance(b))
+    let table = map.slice()
+    table[0] = 2
+    dom.children[0].style.backgroundColor = "lightgreen"
+    let flag = false,
+      lastPosition
+
+    function insert([x, y], pre) {
+      if (table[x + y * 100] != 0 || table[x + 100 * y] == 2) return
+      if (x >= 0 && x <= 100 && y >= 0 && y <= 100) {
+        openList.insert([x, y])
+        // 存上一个节点的坐标
+        table[x + 100 * y] = pre
+        if (!(end[1] == y && end[0] == x)) {
+          dom.children[x + y * 100].style.backgroundColor = "lightgreen"
+        }
+        return sleep(1)
+      }
+    }
+
+    while (openList.length) {
+      let [x, y] = openList.take()
+      if (end[1] == y && end[0] == x) {
+        flag = true
+        lastPosition = [x, y]
+        break
+      }
+      if (!(table[x + y * 100] == 1)) {
+        await insert([x + 1, y], [x, y])
+        await insert([x - 1, y], [x, y])
+        await insert([x, y + 1], [x, y])
+        await insert([x, y - 1], [x, y])
+        // 斜方向给个判断
+        if (map[x + 1 + y * 100] != 1 || map[x + (y - 1) * 100] != 1) {
+          await insert([x + 1, y - 1], [x, y])
+        }
+        if (map[x - 1 + y * 100] != 1 || map[x + (y - 1) * 100] != 1) {
+          await insert([x - 1, y - 1], [x, y])
+        }
+        if (map[x - 1 + y * 100] != 1 || map[x + (y + 1) * 100] != 1) {
+          await insert([x - 1, y + 1], [x, y])
+        }
+        if (map[x + 1 + y * 100] != 1 || map[x + (y + 1) * 100] != 1) {
+          await insert([x + 1, y + 1], [x, y])
+        }
+      }
+    }
+    if (flag) {
+      let [x, y] = lastPosition
+      let path = [
+        [x, y]
+      ]
+      while (x != start[0] || y != start[1]) {
+        [x, y] = table[100 * y + x]
+        path.push([x, y]);
+        await sleep(1)
+        dom.children[x + y * 100].style.backgroundColor = "pink"
+      }
+      return path
+    }
+    return null
+  }
+</script>
