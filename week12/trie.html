@@ -1,0 +1,61 @@
+<script>
+  function getWord(length = 4) {
+    let result = []
+    for (let i = 0; i < length; i++) {
+      let rand = Math.ceil(Math.random() * 25)
+      result.push(String.fromCharCode(97 + rand))
+    }
+    return result.join('')
+  }
+  class TrieNode {
+    constructor(val) {
+      this.val = val
+      this.chilrden = {}
+    }
+  }
+  class Trie {
+    constructor() {
+      this.root = Object.create(null)
+      this.pre = 1
+    }
+    insert(word) {
+      let cur = this.root
+      for (let i = 0; i < word.length; i++) {
+        if (!cur[word[i]]) {
+          cur[word[i]] = Object.create(null)
+        }
+        cur = cur[word[i]]
+        if (i == word.length - 1) {
+          if (!cur.$) {
+            cur.$ = 1
+          } else {
+            cur.$++
+            if (this.pre < cur.$) {
+              this.pre = cur.$
+              this.root.mostWord = word
+            }
+          }
+
+          this.root.times = this.pre
+          console.log(word, cur.$)
+        }
+      }
+    }
+    most() {
+      if (this.root.times == 1) {
+        return '每个词都出现了一遍'
+      } else {
+        return {
+          times: this.root.times,
+          mostWord: this.root.mostWord
+        }
+      }
+
+    }
+  }
+
+  let trie = new Trie()
+  for (let i = 0; i < 1000; i++) {
+    trie.insert(getWord(7))
+  }
+</script>
