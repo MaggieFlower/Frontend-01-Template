@@ -1,58 +1,51 @@
 <script>
-  function match(source, pattern) {
-    let m = source.length
-    let n = pattern.length
-    let dp = []
-    for (let x = 0; x < m; x++) {
-      dp[x] = []
+  function remove_duplicat_stars(p) {
+    if (p == '') {
+      return p
     }
-    for (let x = 0; x < m; x++) {
-      for (let y = 0; y < n; y++) {
-        if (x == 0 && y == 0) {
-          dp[0][0] = true
-        } else {
-          dp[x][y] = false
-        }
+    p1 = [p[0]]
+    for (let i = 1; i < p.length; i++) {
+      if (p1[p1.length - 1] != '*' || p1[p1.length - 1] == '*' && p[i] != '*') {
+        p1.push(p[i])
       }
     }
-    if (n != m && pattern != '*' && n == 1) {
-      return false
-    }
-    // m -> y, n -> x
-    // pattern = 0
-    for (let x = 1; x < m; x++) {
-      dp[x][0] = false
-    }
-    // pattern="*"
-    for (let y = 1; y < n; y++) {
-      dp[0][y] = true
-    }
-
-    for (let i = 1; i <= m - 1; i++) {
-      for (let j = 1; j <= n - 1; j++) {
-        if (pattern[j - 1] == '*') {
-          dp[i][j] = dp[i - 1][j] || dp[i][j - 1]
-        } else {
-          if (source[i - 1] == pattern[j - 1] || '?' == pattern[j - 1]) {
-            dp[i][j] = dp[i - 1][j - 1]
-          } else {
-            dp[i][j] = false
-          }
-        }
-      }
-    }
-    return dp[m - 1][n - 1]
+    return p1.join('')
   }
-  match('adceb', '*a*b') // true
-  match('acdcb', 'a*c?b') //false
-  match('acdcb', '*') //true
-  match('adceb', '*b') // true
-  match('adceb', 'a*b') //true
-  match('adceb', 'a*') // true
-  match("aa", "a") // false
-  match("aa", "aa") // true
-  match("aaa", "aa") // false
-  match("aa", "*") // true
-  match("aa", "a*") // true
-  match("ab", "?*") // true
+
+  function helper(s, p) {
+    let dp = new Map()
+    let pairs = [s, p]
+    if (p == s || p == '*') {
+      dp.set(pairs, true)
+    } else if (p == '' || s == '') {
+      dp.set(pairs, false)
+    } else if (s[0] == p[0] || p[0] == '?') {
+      dp.set(pairs, helper(s.slice(1), p.slice(1)))
+    } else if (p[0] == '*') {
+      dp.set(pairs, helper(s.slice(1), p) || helper(s, p.slice(1)))
+    } else {
+      dp.set(pairs, false)
+    }
+    return dp.get(pairs)
+  }
+
+  function isMatch(s, p) {
+    p = remove_duplicat_stars(p)
+    return helper(s, p)
+  }
+
+  // isMatch()
+  isMatch('adceb', '*a*b') // true
+  isMatch('acdcb', 'a*c?b') //false
+  isMatch('acdcb', '*') //true
+  isMatch('adceb', '*b') // true
+  isMatch('adceb', 'a*b') //true
+  isMatch('adceb', 'a*') // true
+  isMatch("aa", "a") // false
+  isMatch("aa", "aa") // true
+  isMatch("aaa", "aa") // false
+  isMatch("aa", "*") // true
+  isMatch("aa", "a*") // true
+  isMatch("ab", "?*") // true
+  isMatch("abcdef", "c*a*e") // false
 </script>
