@@ -1,0 +1,87 @@
+<input id="r" type="range" min=0 max=255>
+<input id="g" type="range" min=0 max=255>
+<input id="b" type="range" min=0 max=255>
+<div style="width: 100px;height: 100px;" id="el"></div>
+<h3></h3>
+<input type="text" id="text" disabled />
+<h3></h3>
+<input type="text" id="t" />
+<script>
+  let r = document.getElementById('r')
+  let g = document.getElementById('g')
+  let b = document.getElementById('b')
+  let text = document.getElementById('text')
+  let t = document.getElementById('t')
+  let z = {
+    r: r.value,
+    g: g.value,
+    b: b.value,
+    t: {
+      'text': '试一试修改color.t.text的值'
+    }
+  }
+  let handlers = new Map()
+  let reactivities = []
+
+  function reactivity(obj) {
+    return new Proxy(obj, {
+      get(obj, prop) {
+        if (typeof obj[prop] === 'object') {
+          return reactivity(obj[prop])
+        } else {
+          reactivities.push([obj, prop])
+        }
+        return obj[prop]
+      },
+      set(obj, prop, value) {
+        obj[prop] = value
+        if (handlers.get(obj).has(prop)) {
+          // 保证多次执行, 数组中只有一次绑定的关系
+          reactivities = []
+          for (let handler of handlers.get(obj).get(prop)) {
+            handler()
+          }
+        }
+        return value
+      }
+    })
+  }
+
+  function effect(handler) {
+    reactivities = []
+    handler()
+    for (let reactivity of reactivities) {
+      let [obj, prop] = reactivity
+      if (!handlers.has(obj)) {
+        handlers.set(obj, new Map())
+      }
+      if (!handlers.get(obj).get(prop)) {
+        handlers.get(obj).set(prop, new Set())
+      }
+      handlers.get(obj).get(prop).add(handler)
+    }
+  }
+  let color = reactivity(z)
+  let el = document.getElementById('el')
+  let dummy
+  effect(() => {
+    let colorR = color.r
+    el.style.backgroundColor = `rgb(${colorR}, ${color.g},${color.b})`
+    text.value = el.style.backgroundColor
+    t.value = color.t.text
+    dummy = colorR == '120' ? '180' : '130'
+  })
+  r.addEventListener('change', function (event) {
+    color.r = event.target.value
+  })
+  g.addEventListener('change', function (event) {
+    color.g = event.target.value
+  })
+  b.addEventListener('change', function (event) {
+    color.b = event.target.value
+  })
+  t.addEventListener('change', function (event) {
+    color.t.text = event.target.value
+    console.log(color.t.text)
+  })
+</script>

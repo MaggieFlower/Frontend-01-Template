@@ -1,0 +1,72 @@
+<style>
+  body,
+  html {
+    margin: 0
+  }
+
+  #drag {
+    width: 100px;
+    height: 100px;
+    background-color: pink;
+    display: inline-block
+  }
+</style>
+<span id="text">
+  静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静静
+</span>
+<div></div>
+<div id="drag"></div>
+
+<script>
+  let dragObj = document.querySelector('#drag')
+  let textObj = document.querySelector('#text')
+  let textObjY = document.querySelector('#text').offsetHeight
+  let baseX, baseY
+  let startX, startY, remainX, remainY
+  let ranges = []
+
+  function move(event) {
+    let range = nearest(event.clientX, event.clientY)
+    setTimeout(() => {
+      range.insertNode(dragObj)
+    }, 500)
+  }
+
+  function up(event) {
+    document.removeEventListener('mousemove', move)
+    document.removeEventListener('mouseup', up)
+  }
+
+  function come(event) {
+    document.addEventListener('mousemove', move)
+    document.addEventListener('mouseup', up)
+  }
+
+  dragObj.addEventListener('mousedown', come)
+  document.addEventListener('selectstart', (event) => {
+    event.preventDefault()
+  })
+  for (let i = 0; i < textObj.textContent.length; i++) {
+    // 这个r必须每次都声明, 不然就是同一个元素
+    let r = document.createRange()
+    r.setStart(textObj.childNodes[0], i)
+    r.setEnd(textObj.childNodes[0], i)
+    ranges.push(r)
+  }
+
+  function nearest(x, y) {
+    let near = null
+    let distance = Infinity,
+      d, x0, y0
+    for (let range of ranges) {
+      x0 = range.getBoundingClientRect().x
+      y0 = range.getBoundingClientRect().y
+      d = (Math.ceil(x - x0)) ** 2 + (Math.ceil(y - y0)) ** 2
+      if (d < distance) {
+        distance = d
+        near = range
+      }
+    }
+    return near
+  }
+</script>
