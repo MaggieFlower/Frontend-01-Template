@@ -1,0 +1,9 @@
+<template><div>textNode<span></span></div></template>
+<script>
+export default {
+  el: '#example',
+  data: {
+    message: 'hello'
+  }
+}
+</script>
