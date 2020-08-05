@@ -1,0 +1,21 @@
+.title-selected{
+  background-color: lightblue;
+}
+.title-unselected{
+  background-color: lightgreen;
+}
+.title{
+  margin: 5px;padding: 0 10px;color:#fff; cursor: pointer; transition: background-color .3s; font-size: 16px; font-weight:100
+}
+.selected{
+  visibility: visible;
+  opacity: 1;
+}
+.un-selected{
+  visibility: hidden;
+ 
+  opacity: 0;
+}
+.content{
+  width: 300px;height: 300px;border: 1px solid lightgreen; transition: visibility 0s, opacity 1s; position: absolute;
+}
